@@ -22,6 +22,9 @@ builder.Services.AddScoped<IMovieRepository, MovieRepository>();
 // Register Movie Service
 builder.Services.AddScoped<IMovieService, MovieService>();
 
+builder.Services.AddScoped<ITheatreRepository, TheatreRepository>();
+builder.Services.AddScoped<ITheatreService, TheatreService>();
+
 // Register authorization
 builder.Services.AddAuthorization();
 
