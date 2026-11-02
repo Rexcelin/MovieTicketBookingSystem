@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieTicketBookingSystem.DTOs.Seats;
 using MovieTicketBookingSystem.Services.Interfaces;
@@ -17,6 +18,8 @@ public class SeatsController : ControllerBase
     }
 
     // POST: api/seats
+    // Admin only
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     public async Task<IActionResult> CreateSeat(
         [FromBody] CreateSeatRequest request)
@@ -44,6 +47,8 @@ public class SeatsController : ControllerBase
     }
 
     // POST: api/seats/bulk
+    // Admin only
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost("bulk")]
     public async Task<IActionResult> CreateSeatsBulk(
         [FromBody] List<CreateSeatRequest> requests)
@@ -68,6 +73,8 @@ public class SeatsController : ControllerBase
     }
 
     // GET: api/seats
+    // Admin and Customer
+    [Authorize(Policy = "AdminOrCustomer")]
     [HttpGet]
     public async Task<IActionResult> GetAllSeats()
     {
@@ -77,6 +84,8 @@ public class SeatsController : ControllerBase
     }
 
     // GET: api/seats/5
+    // Admin and Customer
+    [Authorize(Policy = "AdminOrCustomer")]
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetSeatById(int id)
     {
@@ -96,6 +105,8 @@ public class SeatsController : ControllerBase
     }
 
     // GET: api/seats/screen/1
+    // Admin and Customer
+    [Authorize(Policy = "AdminOrCustomer")]
     [HttpGet("screen/{screenId:int}")]
     public async Task<IActionResult> GetSeatsByScreenId(int screenId)
     {
@@ -112,6 +123,8 @@ public class SeatsController : ControllerBase
     }
 
     // PUT: api/seats/5
+    // Admin only
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateSeat(
         int id,
@@ -140,6 +153,8 @@ public class SeatsController : ControllerBase
     }
 
     // DELETE: api/seats/5
+    // Admin only
+    [Authorize(Policy = "AdminOnly")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteSeat(int id)
     {

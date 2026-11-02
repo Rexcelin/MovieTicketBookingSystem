@@ -1,5 +1,4 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace MovieTicketBookingSystem.Models;
 
@@ -13,6 +12,10 @@ public class Booking
 
     [Required]
     public int ShowId { get; set; }
+
+    // Authenticated user who created this booking
+    [Required]
+    public string UserId { get; set; } = string.Empty;
 
     [Required]
     [StringLength(100)]
@@ -38,7 +41,10 @@ public class Booking
     public string Status { get; set; } = "Confirmed";
 
     // Navigation properties
+    public ApplicationUser User { get; set; } = null!;
+
     public Show Show { get; set; } = null!;
 
-    public ICollection<BookingSeat> BookingSeats { get; set; } = new List<BookingSeat>();
+    public ICollection<BookingSeat> BookingSeats { get; set; }
+        = new List<BookingSeat>();
 }

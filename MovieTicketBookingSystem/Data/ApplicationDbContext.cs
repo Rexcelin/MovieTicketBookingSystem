@@ -31,6 +31,16 @@ public class ApplicationDbContext
         // Configure Identity tables first
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<Booking>(entity =>
+        {
+            entity.HasOne(b => b.User)
+                .WithMany()
+                .HasForeignKey(b => b.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(b => b.UserId);
+        });
+
         // Movie configuration
         modelBuilder.Entity<Movie>(entity =>
         {

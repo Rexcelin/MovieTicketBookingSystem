@@ -1,5 +1,4 @@
-﻿
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MovieTicketBookingSystem.Data;
 using MovieTicketBookingSystem.Models;
 using MovieTicketBookingSystem.Repositories.Interfaces;
@@ -24,10 +23,8 @@ public class BookingRepository : IBookingRepository
 
         try
         {
-            // Add booking and its BookingSeats
             _context.Bookings.Add(booking);
 
-            // Update only the ShowSeat status in the database
             var showSeatIds = showSeats
                 .Select(ss => ss.ShowSeatId)
                 .ToList();
@@ -51,27 +48,31 @@ public class BookingRepository : IBookingRepository
 
     public async Task<Booking?> GetByIdAsync(int bookingId)
     {
-        return await _context.Bookings
-            .Include(b => b.Show)
-                .ThenInclude(s => s.Movie)
-            .Include(b => b.Show)
-                .ThenInclude(s => s.Screen)
-                    .ThenInclude(sc => sc.Theatre)
-            .Include(b => b.BookingSeats)
-                .ThenInclude(bs => bs.Seat)
+        return await GetBookingQuery()
             .FirstOrDefaultAsync(b => b.BookingId == bookingId);
+    }
+
+    public async Task<Booking?> GetByIdForUserAsync(
+        int bookingId,
+        string userId)
+    {
+        return await GetBookingQuery()
+            .FirstOrDefaultAsync(b =>
+                b.BookingId == bookingId &&
+                b.UserId == userId);
     }
 
     public async Task<List<Booking>> GetAllAsync()
     {
-        return await _context.Bookings
-            .Include(b => b.Show)
-                .ThenInclude(s => s.Movie)
-            .Include(b => b.Show)
-                .ThenInclude(s => s.Screen)
-                    .ThenInclude(sc => sc.Theatre)
-            .Include(b => b.BookingSeats)
-                .ThenInclude(bs => bs.Seat)
+        return await GetBookingQuery()
+            .OrderByDescending(b => b.BookingDate)
+            .ToListAsync();
+    }
+
+    public async Task<List<Booking>> GetByUserIdAsync(string userId)
+    {
+        return await GetBookingQuery()
+            .Where(b => b.UserId == userId)
             .OrderByDescending(b => b.BookingDate)
             .ToListAsync();
     }
@@ -104,5 +105,17 @@ public class BookingRepository : IBookingRepository
             await transaction.RollbackAsync();
             throw;
         }
+    }
+
+    private IQueryable<Booking> GetBookingQuery()
+    {
+        return _context.Bookings
+            .Include(b => b.Show)
+                .ThenInclude(s => s.Movie)
+            .Include(b => b.Show)
+                .ThenInclude(s => s.Screen)
+                    .ThenInclude(sc => sc.Theatre)
+            .Include(b => b.BookingSeats)
+                .ThenInclude(bs => bs.Seat);
     }
 }

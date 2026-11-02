@@ -1,4 +1,4 @@
-﻿
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieTicketBookingSystem.DTOs.Shows;
@@ -18,6 +18,8 @@ public class ShowsController : ControllerBase
     }
 
     // POST: api/shows
+    // Admin only
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     public async Task<IActionResult> CreateShow(
         [FromBody] CreateShowRequest request)
@@ -45,6 +47,8 @@ public class ShowsController : ControllerBase
     }
 
     // GET: api/shows
+    // Admin and Customer
+    [Authorize(Policy = "AdminOrCustomer")]
     [HttpGet]
     public async Task<IActionResult> GetAllShows()
     {
@@ -54,6 +58,8 @@ public class ShowsController : ControllerBase
     }
 
     // GET: api/shows/1
+    // Admin and Customer
+    [Authorize(Policy = "AdminOrCustomer")]
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetShowById(int id)
     {
@@ -73,6 +79,8 @@ public class ShowsController : ControllerBase
     }
 
     // GET: api/shows/movie/1
+    // Admin and Customer
+    [Authorize(Policy = "AdminOrCustomer")]
     [HttpGet("movie/{movieId:int}")]
     public async Task<IActionResult> GetShowsByMovieId(int movieId)
     {
@@ -89,6 +97,8 @@ public class ShowsController : ControllerBase
     }
 
     // GET: api/shows/screen/1
+    // Admin and Customer
+    [Authorize(Policy = "AdminOrCustomer")]
     [HttpGet("screen/{screenId:int}")]
     public async Task<IActionResult> GetShowsByScreenId(int screenId)
     {
@@ -105,6 +115,8 @@ public class ShowsController : ControllerBase
     }
 
     // PUT: api/shows/1
+    // Admin only
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateShow(
         int id,
@@ -133,6 +145,8 @@ public class ShowsController : ControllerBase
     }
 
     // DELETE: api/shows/1
+    // Admin only
+    [Authorize(Policy = "AdminOnly")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteShow(int id)
     {
@@ -157,7 +171,10 @@ public class ShowsController : ControllerBase
             });
         }
     }
+
     // GET: api/shows/1/seats
+    // Admin and Customer
+    [Authorize(Policy = "AdminOrCustomer")]
     [HttpGet("{showId:int}/seats")]
     public async Task<IActionResult> GetShowSeats(int showId)
     {

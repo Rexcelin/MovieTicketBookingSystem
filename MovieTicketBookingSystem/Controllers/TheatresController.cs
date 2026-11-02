@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MovieTicketBookingSystem.Constants;
 using MovieTicketBookingSystem.DTOs.Theatres;
 using MovieTicketBookingSystem.Services.Interfaces;
 
@@ -17,6 +19,8 @@ public class TheatresController : ControllerBase
     }
 
     // POST: api/theatres
+    // Admin only
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     public async Task<ActionResult<TheatreResponse>> CreateTheatre(
         [FromBody] CreateTheatreRequest request)
@@ -37,6 +41,8 @@ public class TheatresController : ControllerBase
     }
 
     // GET: api/theatres
+    // Admin and Customer
+    [Authorize(Policy = "AdminOrCustomer")]
     [HttpGet]
     public async Task<ActionResult<List<TheatreResponse>>> GetAllTheatres()
     {
@@ -46,6 +52,8 @@ public class TheatresController : ControllerBase
     }
 
     // GET: api/theatres/1
+    // Admin and Customer
+    [Authorize(Policy = "AdminOrCustomer")]
     [HttpGet("{id:int}")]
     public async Task<ActionResult<TheatreResponse>> GetTheatreById(int id)
     {
@@ -65,6 +73,8 @@ public class TheatresController : ControllerBase
     }
 
     // PUT: api/theatres/1
+    // Admin only
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id:int}")]
     public async Task<ActionResult<TheatreResponse>> UpdateTheatre(
         int id,
@@ -86,6 +96,8 @@ public class TheatresController : ControllerBase
     }
 
     // DELETE: api/theatres/1
+    // Admin only
+    [Authorize(Policy = "AdminOnly")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteTheatre(int id)
     {

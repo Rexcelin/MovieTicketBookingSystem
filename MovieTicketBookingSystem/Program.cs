@@ -1,10 +1,10 @@
 
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MovieTicketBookingSystem.Configurations;
+using MovieTicketBookingSystem.Constants;
 using MovieTicketBookingSystem.Data;
 using MovieTicketBookingSystem.Models;
 using MovieTicketBookingSystem.Repositories;
@@ -12,6 +12,7 @@ using MovieTicketBookingSystem.Repositories.Interfaces;
 using MovieTicketBookingSystem.Services;
 using MovieTicketBookingSystem.Services.Interfaces;
 using Scalar.AspNetCore;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -117,7 +118,17 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Register authorization services
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireRole(UserRoles.Admin));
+
+    options.AddPolicy("CustomerOnly", policy =>
+        policy.RequireRole(UserRoles.Customer));
+
+    options.AddPolicy("AdminOrCustomer", policy =>
+        policy.RequireRole(UserRoles.Admin, UserRoles.Customer));
+});
 
 // Register OpenAPI
 builder.Services.AddOpenApi();
