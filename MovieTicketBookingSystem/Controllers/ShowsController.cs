@@ -157,4 +157,19 @@ public class ShowsController : ControllerBase
             });
         }
     }
+    // GET: api/shows/1/seats
+    [HttpGet("{showId:int}/seats")]
+    public async Task<IActionResult> GetShowSeats(int showId)
+    {
+        try
+        {
+            var seats = await _showService.GetShowSeatsAsync(showId);
+
+            return Ok(seats);
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
 }

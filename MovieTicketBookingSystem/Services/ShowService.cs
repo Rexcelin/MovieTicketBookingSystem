@@ -15,19 +15,21 @@ public class ShowService : IShowService
     private readonly IMovieRepository _movieRepository;
     private readonly IScreenRepository _screenRepository;
     private readonly ISeatRepository _seatRepository;
+    private readonly IShowSeatRepository _showSeatRepository;
 
     public ShowService(
         ApplicationDbContext context,
         IShowRepository showRepository,
         IMovieRepository movieRepository,
         IScreenRepository screenRepository,
-        ISeatRepository seatRepository)
+        ISeatRepository seatRepository, IShowSeatRepository showSeatRepository)
     {
         _context = context;
         _showRepository = showRepository;
         _movieRepository = movieRepository;
         _screenRepository = screenRepository;
         _seatRepository = seatRepository;
+        _showSeatRepository = showSeatRepository;
     }
 
     public async Task<ShowResponse> CreateShowAsync(
@@ -349,5 +351,31 @@ public class ShowService : IShowService
             EndTime = show.EndTime,
             TicketPrice = show.TicketPrice
         };
+    }
+
+    public async Task<List<ShowSeatResponse>> GetShowSeatsAsync(int showId)
+    {
+        // Check whether the show exists
+        var show = await _showRepository.GetByIdAsync(showId);
+
+        if (show == null)
+        {
+            throw new ArgumentException("Show not found.");
+        }
+
+        // Retrieve all seats assigned to this show
+        var showSeats = await _showSeatRepository.GetByShowIdAsync(showId);
+
+        // Convert entities into response DTOs
+        return showSeats.Select(ss => new ShowSeatResponse
+        {
+            ShowSeatId = ss.ShowSeatId,
+            ShowId = ss.ShowId,
+            SeatId = ss.SeatId,
+            RowName = ss.Seat.RowName,
+            SeatNumber = ss.Seat.SeatNumber,
+            SeatType = ss.Seat.SeatType,
+            Status = ss.Status
+        }).ToList();
     }
 }

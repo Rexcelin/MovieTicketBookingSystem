@@ -15,9 +15,12 @@ public interface IShowService
 
     Task<List<ShowResponse>> GetShowsByScreenIdAsync(int screenId);
 
+   
     Task<ShowResponse?> UpdateShowAsync(
         int showId,
         UpdateShowRequest request);
 
     Task<bool> DeleteShowAsync(int showId);
+
+    Task<List<ShowSeatResponse>> GetShowSeatsAsync(int showId);
 }
