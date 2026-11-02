@@ -1,16 +1,21 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using MovieTicketBookingSystem.Models;
 
 namespace MovieTicketBookingSystem.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext
+    : IdentityDbContext<ApplicationUser, IdentityRole, string>
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    public ApplicationDbContext(
+        DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
     }
 
-    // Database tables
+    // Existing database tables
     public DbSet<Movie> Movies => Set<Movie>();
     public DbSet<Theatre> Theatres => Set<Theatre>();
     public DbSet<Screen> Screens => Set<Screen>();
@@ -19,9 +24,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<ShowSeat> ShowSeats => Set<ShowSeat>();
     public DbSet<Booking> Bookings => Set<Booking>();
     public DbSet<BookingSeat> BookingSeats => Set<BookingSeat>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Configure Identity tables first
         base.OnModelCreating(modelBuilder);
 
         // Movie configuration
@@ -250,6 +257,27 @@ public class ApplicationDbContext : DbContext
                 t.HasCheckConstraint(
                     "CK_BookingSeats_Price",
                     "[Price] >= 0"));
+        });
+
+        // RefreshToken configuration
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasKey(rt => rt.RefreshTokenId);
+
+            entity.Property(rt => rt.UserId)
+                .IsRequired();
+
+            entity.Property(rt => rt.Token)
+                .IsRequired()
+                .HasMaxLength(500);
+
+            entity.HasIndex(rt => rt.Token)
+                .IsUnique();
+
+            entity.HasOne(rt => rt.User)
+                .WithMany()
+                .HasForeignKey(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
