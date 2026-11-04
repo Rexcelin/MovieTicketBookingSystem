@@ -1,0 +1,95 @@
+
+<div class="admin-wrapper">
+
+  <!-- Mobile overlay -->
+  @if (isSidebarOpen()) {
+    <div class="sidebar-overlay" (click)="closeSidebar()"></div>
+  }
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar" [class.open]="isSidebarOpen()">
+
+    <a href="#dashboard" class="admin-brand" (click)="closeSidebar()">
+      <span class="brand-icon">
+        <i class="fa-solid fa-film"></i>
+      </span>
+      <span>Movie<span class="brand-accent">Mate</span></span>
+    </a>
+
+    <div class="sidebar-label">MAIN MENU</div>
+
+    <nav class="sidebar-nav" aria-label="Admin navigation">
+      <a href="#dashboard" class="sidebar-link active" (click)="closeSidebar()">
+        <i class="fa-solid fa-gauge-high"></i>
+        <span>Dashboard</span>
+      </a>
+
+      <a href="#movies" class="sidebar-link" (click)="closeSidebar()">
+        <i class="fa-solid fa-film"></i>
+        <span>Movies</span>
+      </a>
+
+      <a href="#theatres" class="sidebar-link" (click)="closeSidebar()">
+        <i class="fa-solid fa-building"></i>
+        <span>Theatres</span>
+      </a>
+
+      <a href="#screens" class="sidebar-link" (click)="closeSidebar()">
+        <i class="fa-solid fa-desktop"></i>
+        <span>Screens</span>
+      </a>
+
+      <a href="#shows" class="sidebar-link" (click)="closeSidebar()">
+        <i class="fa-solid fa-calendar-days"></i>
+        <span>Shows</span>
+      </a>
+
+      <a href="#bookings" class="sidebar-link" (click)="closeSidebar()">
+        <i class="fa-solid fa-ticket"></i>
+        <span>Bookings</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="admin-profile">
+        <div class="profile-avatar">A</div>
+        <div>
+          <strong>Administrator</strong>
+          <small>Admin Panel</small>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Main area -->
+  <div class="admin-main">
+
+    <header class="admin-header">
+      <button
+        class="sidebar-toggle"
+        type="button"
+        (click)="toggleSidebar()"
+        aria-label="Toggle admin sidebar"
+        [attr.aria-expanded]="isSidebarOpen()"
+      >
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <div class="header-title">
+        <h1>Admin Dashboard</h1>
+        <p>Manage your movie booking platform</p>
+      </div>
+
+      <div class="header-account">
+        <span class="admin-badge">ADMIN</span>
+        <div class="profile-avatar">A</div>
+      </div>
+    </header>
+
+    <main class="admin-content">
+      <router-outlet />
+    </main>
+
+  </div>
+</div>
