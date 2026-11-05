@@ -1,8 +1,9 @@
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MovieTicketBookingSystem.Authorization;
 using MovieTicketBookingSystem.Configurations;
 using MovieTicketBookingSystem.Constants;
 using MovieTicketBookingSystem.Data;
@@ -11,6 +12,7 @@ using MovieTicketBookingSystem.Repositories;
 using MovieTicketBookingSystem.Repositories.Interfaces;
 using MovieTicketBookingSystem.Services;
 using MovieTicketBookingSystem.Services.Interfaces;
+using MovieTicketBookingSystem.Middleware;
 using Scalar.AspNetCore;
 using System.Text;
 
@@ -112,48 +114,96 @@ builder.Services.AddScoped<IShowService, ShowService>();
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 
-// Register authentication token service
+// Register authentication services
 builder.Services.AddScoped<ITokenService, TokenService>();
-
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Register authorization services
+// Register custom booking authorization handler
+builder.Services.AddScoped<
+    IAuthorizationHandler,
+    BookingOwnerAuthorizationHandler>();
+
+// Register authorization policies
 builder.Services.AddAuthorization(options =>
 {
+    // Only Admin users
     options.AddPolicy("AdminOnly", policy =>
         policy.RequireRole(UserRoles.Admin));
 
+    // Only Customer users
     options.AddPolicy("CustomerOnly", policy =>
         policy.RequireRole(UserRoles.Customer));
 
+    // Admin or Customer users
     options.AddPolicy("AdminOrCustomer", policy =>
         policy.RequireRole(UserRoles.Admin, UserRoles.Customer));
+
+    // Custom resource-based booking ownership authorization
+    options.AddPolicy("BookingOwner", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.AddRequirements(new BookingOwnerRequirement());
+    });
 });
 
 // Register OpenAPI
 builder.Services.AddOpenApi();
 
+
 var app = builder.Build();
 
-// Seed application roles
+// Seed application roles and assign Admin role
 using (var scope = app.Services.CreateScope())
 {
     await RoleSeeder.SeedRolesAsync(scope.ServiceProvider);
+
+    await AdminRoleSeeder.AssignAdminRoleAsync(
+        scope.ServiceProvider,
+        app.Configuration);
 }
 
-// Configure HTTP request pipeline
+// Configure OpenAPI and Scalar
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
 
+// ==========================================
+// HTTP REQUEST PIPELINE
+// ==========================================
+
+// 1. HTTPS Redirection
 app.UseHttpsRedirection();
 
-// Authentication must run before Authorization
+// 2. Routing
+app.UseRouting();
+
+// 3. Endpoint Metadata Diagnostics
+if (app.Environment.IsDevelopment())
+{
+    app.UseMiddleware<EndpointMetadataMiddleware>();
+}
+
+// 4. Authentication
+// Validates JWT and populates HttpContext.User
 app.UseAuthentication();
+
+// 5. Authentication Diagnostics
+if (app.Environment.IsDevelopment())
+{
+    app.UseMiddleware<AuthenticationDiagnosticsMiddleware>();
+
+    // 6. Authorization Diagnostics
+    app.UseMiddleware<AuthorizationDiagnosticsMiddleware>();
+}
+
+// 7. Authorization
+// Checks endpoint access permissions
 app.UseAuthorization();
 
+// 8. Map Controllers
 app.MapControllers();
 
+// 9. Run Application
 app.Run();
